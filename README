@@ -1,0 +1,84 @@
+body-meta-dist.py calculates distributions of given metadata elements from
+fls bodyfiles (see The Sleuth Kit). This may be useful to locate malicious code
+in compromised file systems (i.e. backdoors via trojaned binaries, etc.).
+
+usage: body-meta-dist.py [-h] --file FILENAME [--meta META]
+
+This script parses an fls bodyfile and returns the metadata distribution on
+a per directory basis.
+
+optional arguments:
+  -h, --help       show this help message and exit
+  --file FILENAME  An fls bodyfile, see The Sleuth Kit.
+  --meta META      --meta can be mode, uid, gid, atime, mtime, ctime, crtime.
+                     Default is "uid"
+
+Examples:
+
+uid example:
+./body-meta-dist.py --file sda1_bodyfile.txt
+Path:  /usr/lib
+Count   uid     %
+-------------------------------------------
+     1     10   0.05%
+     1   1000   0.05%
+     1     37   0.05%
+  2082      0   99.86%
+
+In this edited example output, we see that 99% of the files in /usr/lib are
+uid 0, with three files having uids of 10, 1000 and 37. These files may be good
+candidates for further review.
+
+Looking through the files in /usr/lib for this file system, uid 10 is uucp and
+the file with uid 10 is actually the uucp directory in /usr/lib. Likewise, the
+file having uid 37 is actually the rpm directory under /usr/lib and on this 
+system uid 37 is that of the rpm account. This system has no user with uid 1000
+and in fact, the file in /usr/lib having this uid was malicious code.
+
+
+mode example:
+./body-meta-dist.py --file sda1_bodyfile.txt --meta mode
+Path:  /usr/sbin
+Count   mode    %
+-------------------------------------------
+     1  -/----------    0.14%
+     1  -/lrwxrwxrwx    0.14%
+     1  -/rrw-r--r--    0.14%
+     1  l/rr--r--r--    0.14%
+     1  r/rr-s--x---    0.14%
+     1  r/rrws--x--x    0.14%
+     2  l/rr-xr-xr-x    0.28%
+     2  r/rrwx--x--x    0.28%
+     3  l/rrw-r--r--    0.43%
+     3  l/rrwxr-xr-x    0.43%
+     3  r/rr-sr-sr-x    0.43%
+     4  r/rrwsr-xr-x    0.57%
+     4  r/rrwxr-sr-x    0.57%
+     5  r/lrwxrwxrwx    0.71%
+     6  r/rrwx------    0.85%
+     7  r/rrw-r--r--    0.99%
+    11  l/----------    1.56%
+    14  r/rrwxr-x---    1.99%
+    20  r/rr-xr-xr-x    2.84%
+    65  r/----------    9.23%
+   108  l/lrwxrwxrwx    15.34%
+   441  r/rrwxr-xr-x    62.64%
+
+In the example output we see the mode distribution (e.g. The Sleuth Kit
+documentation refers to file type and permissions in the bodyfile as mode) for
+the files and directories immediately under /usr/sbin. I've seen cases where
+attackers replaced system binaries in a directory like this (or simply dropped
+in new binaries) and neglected to chmod the permissions to match the original 
+binary or surrounding files. Such an oversight may stick out like a sore thumb
+when reviewing mode distributions such as the following example:
+
+Path:  /etc/rc.d/init.d
+Count   mode    %
+-------------------------------------------
+     1  r/rr-xr-xr-x    1.09%
+    91  r/rrwxr-xr-x    98.91%
+
+To map these outliers back to actual files, simply search the bodyfile, 
+timeline file or mount the file system image and look for the file with these
+permissions, and yes, in this example, this was a startup script for attacker
+code.
