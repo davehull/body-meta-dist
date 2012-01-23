@@ -2,21 +2,24 @@ body-meta-dist.py calculates distributions of given metadata elements from
 fls bodyfiles (see The Sleuth Kit). This may be useful to locate malicious code
 in compromised file systems (i.e. backdoors via trojaned binaries, etc.).
 
-usage: body-meta-dist.py [-h] --file FILENAME [--meta META]
+usage: body-meta-dist.py [-h] [--meta META] filename
 
-This script parses an fls bodyfile and returns the metadata distribution on
+This script parses an fls bodyfile and returns the uid or gid distribution on
 a per directory basis.
 
+positional arguments:
+  filename     An fls bodyfile, see The Sleuth Kit.
+
 optional arguments:
-  -h, --help       show this help message and exit
-  --file FILENAME  An fls bodyfile, see The Sleuth Kit.
-  --meta META      --meta can be mode, uid, gid, atime, mtime, ctime, crtime.
-                     Default is "uid"
+    -h, --help   show this help message and exit
+    --meta META  --meta can be mode, uid, gid, atime, mtime, ctime, crtime.
+                   Default is "uid"
+
 
 Examples:
 
 uid example:
-./body-meta-dist.py --file sda1_bodyfile.txt
+./body-meta-dist.py sda1_bodyfile.txt
 Path:  /usr/lib
 Count   uid     %
 -------------------------------------------
@@ -37,7 +40,7 @@ and in fact, the file in /usr/lib having this uid was malicious code.
 
 
 mode example:
-./body-meta-dist.py --file sda1_bodyfile.txt --meta mode
+./body-meta-dist.py --meta mode sda1_bodyfile.txt 
 Path:  /usr/sbin
 Count   mode    %
 -------------------------------------------
