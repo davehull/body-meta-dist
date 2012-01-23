@@ -125,10 +125,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = \
         'This script parses an fls bodyfile and returns the uid or gid ' \
         'distribution on a per directory basis.')
-    parser.add_argument('--file', help = 'An fls bodyfile, see The Sleuth ' \
-        'Kit.', dest = 'filename', required = True)
     parser.add_argument('--meta', help = '--meta can be mode, uid, gid, atime, ' \
         'mtime, ctime, crtime. Default is "uid"', dest = 'meta', default = 'uid')
+    parser.add_argument('filename', help = 'An fls bodyfile, see The Sleuth Kit.')
     if len(sys.argv) == 1:
         parser.print_help()
         quit()
